@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpOverrides;
 using Aptabase.Application.Query;
 using Aptabase.Application.Blob;
+using Aptabase.Application.Billing;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
@@ -105,6 +106,7 @@ builder.Services.AddSingleton<IIngestionClient, TinybirdIngestionClient>();
 builder.Services.AddHttpClient("Tinybird", client =>
 {
     client.BaseAddress = new Uri(appEnv.TinybirdBaseUrl);
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.api+json"));
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", appEnv.TinybirdToken);
 });
 
@@ -112,6 +114,13 @@ if (appEnv.IsManagedCloud)
     builder.Services.AddSingleton<IEmailClient, SESEmailClient>();
 else
     builder.Services.AddSingleton<IEmailClient, SmtpEmailClient>();
+
+builder.Services.AddSingleton<LemonSqueezyClient>();
+builder.Services.AddHttpClient("LemonSqueezy", client =>
+{
+    client.BaseAddress = new Uri("https://api.lemonsqueezy.com");
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", appEnv.LemonSqueezyApiKey);
+});
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 var dbFactory = new DbConnectionFactory(appEnv.ConnectionString);

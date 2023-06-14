@@ -1,5 +1,6 @@
 import { ErrorState, LoadingState, api } from "@app/primitives";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 
 type CurrentUsageItem = {
   count: number;
@@ -8,7 +9,7 @@ type CurrentUsageItem = {
 
 export function CurrentUsage() {
   const { isLoading, isError, data } = useQuery(["billing-usage"], () =>
-    api.get<CurrentUsageItem>(`/_billing`)
+    api.get<CurrentUsageItem>(`/_billing/usage`)
   );
 
   if (isLoading) return <LoadingState />;
@@ -18,7 +19,12 @@ export function CurrentUsage() {
 
   return (
     <div className="p-2 flex flex-col space-y-1">
-      <p className="text-sm font-medium mb-1">Current Usage</p>
+      <div className="text-sm font-medium mb-1 flex justify-between items-center">
+        <div>Current Usage</div>
+        <Link to="/billing" className="hover:text-primary-500 underline">
+          Billing
+        </Link>
+      </div>
       <div className="text-sm text-subtle">
         {data.count?.toLocaleString()} / {data.quota?.toLocaleString()} events (
         {perc.toPrecision(2)}%)

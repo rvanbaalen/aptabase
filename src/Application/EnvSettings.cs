@@ -55,6 +55,9 @@ public class EnvSettings
     // Variable Name: OAUTH_GOOGLE_CLIENT_SECRET
     public string OAuthGoogleClientSecret { get; private set; } = "";
 
+    // The following properties are reserved for managed cloud
+    public string LemonSqueezyApiKey { get; private set; } = "";
+
 
     //  The following properties are derived from the above settings
     public bool IsManagedCloud => Region == "EU" || Region == "US";
@@ -86,6 +89,8 @@ public class EnvSettings
             OAuthGitHubClientSecret = Get("OAUTH_GITHUB_CLIENT_SECRET"),
             OAuthGoogleClientId = Get("OAUTH_GOOGLE_CLIENT_ID"),
             OAuthGoogleClientSecret = Get("OAUTH_GOOGLE_CLIENT_SECRET"),
+
+            LemonSqueezyApiKey = Get("LEMON_SQUEEZY_API_KEY"),
         };
     }
 

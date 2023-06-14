@@ -4,7 +4,7 @@ export function SignInWithGoogle() {
   return (
     <a
       href={url}
-      className="btn inline-flex w-full items-center space-x-2 justify-center border border-default bg-default hover:bg-subtle"
+      className="p-2 text-sm inline-flex w-full items-center space-x-2 justify-center border border-default bg-default hover:bg-subtle"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

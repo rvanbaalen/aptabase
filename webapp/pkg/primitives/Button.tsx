@@ -1,4 +1,7 @@
+import clsx from "clsx";
+
 type Props = {
+  size?: "default" | "sm" | "xs";
   variant: "primary" | "secondary" | "danger";
   onClick?: () => void | Promise<void>;
   loading?: boolean;
@@ -34,6 +37,12 @@ const Loading = () => {
   );
 };
 
+const sizes = {
+  xs: "px-1 py-0.5 text-xs",
+  sm: "px-2 py-1 text-sm",
+  default: "px-2 py-1.5 text-base",
+};
+
 const classNames = {
   primary: "btn bg-primary text-white hover:opacity-90",
   secondary: "btn bg-subtle text-default hover:opacity-90",
@@ -42,12 +51,13 @@ const classNames = {
 
 export function Button(props: Props) {
   const className = classNames[props.variant];
+  const sizeClassName = sizes[props.size ?? "default"];
 
   return (
     <button
       type="submit"
       disabled={props.loading || props.disabled}
-      className={className}
+      className={clsx(className, sizeClassName)}
       onClick={props.onClick}
     >
       {props.loading ? <Loading /> : props.children}
