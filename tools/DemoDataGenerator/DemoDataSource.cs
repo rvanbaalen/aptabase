@@ -1,6 +1,6 @@
-namespace Aptabase.Application.Demo;
+namespace Aptabase.Tools.DemoDataGenerator;
 
-public static class DemoDataGenerator
+public static class DemoDataSource
 {
     private static Random _random = new Random();
     private static string[] sdk_version = new[] { "en_US", "en_IE", "de_DE", "pt_PT", "pt_BR", "es_ES" };
@@ -123,6 +123,18 @@ public static class DemoDataGenerator
     };
 
     private static (string, string, string, string)[] devices = new[] {
+        ("visionOS", "1.0.0", "", ""),
+        ("visionOS", "1.0.2", "", ""),
+        ("visionOS", "1.0.3", "", ""),
+        ("iPadOS", "16.4", "", ""),
+        ("iPadOS", "16.3", "", ""),
+        ("iPadOS", "17.0", "", ""),
+        ("watchOS", "10.0", "", ""),
+        ("watchOS", "10.0", "", ""),
+        ("watchOS", "9.4", "", ""),
+        ("iOS", "16.4", "", ""),
+        ("iOS", "16.2", "", ""),
+        ("iOS", "17.0", "", ""),
         ("macOS", "13.2.1", "WebKit", "16611.2.7.1.4"),
         ("macOS", "13.1", "WebKit", "17612.4.9.1.8"),
         ("macOS", "13.0.1", "WebKit", "17613.2.7.1.8"),
@@ -163,11 +175,10 @@ public static class DemoDataGenerator
         ("3.1.0", "", "tauri-plugin-aptabase@1.0.0"),
     };
 
-    public static (string, DateTime[]) NewSession()
+    public static (string, DateTime[]) NewSession(DateTime startedAt, int maxEventsPerSession)
     {
-        var eventsCount = _random.Next(2, 10);
+        var eventsCount = _random.Next(2, maxEventsPerSession);
         var sessionId = Guid.NewGuid().ToString().ToLower();
-        var startedAt = DateTime.UtcNow.AddMinutes(_random.Next(-30, -10));
 
         var timestamps = Enumerable.Range(0, eventsCount)
             .Select(i => startedAt.AddSeconds(i * 15).AddSeconds(_random.Next(1, 10)))
@@ -202,7 +213,7 @@ public static class DemoDataGenerator
         return locales[index];
     }
 
-    public static (string, Dictionary<string, object>) GetEvent()
+    public static (string, Dictionary<string, object>) NewEvent()
     {
         var eventName = events[_random.Next(0, events.Length)];
         var (artist, music) = musics[_random.Next(0, musics.Length)];

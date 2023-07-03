@@ -38,19 +38,26 @@ public struct EventHeader
     public string AppId { get; private set; }
     public string? CountryCode { get; private set; }
     public string? RegionName { get; private set; }
-    public string? City { get; private set; }
 
-    public EventHeader(string appId, string? countryCode = null, string? regionName = null, string? city = null)
+    public EventHeader(string appId, string? countryCode = null, string? regionName = null)
     {
         AppId = appId;
         CountryCode = countryCode;
         RegionName = regionName;
-        City = city;
     }
+}
+
+public static class EventsTTL
+{
+    // Events from Debug builds are kept for 6 months
+    public static readonly TimeSpan Debug = TimeSpan.FromDays(182);
+    // Events from Release builds are kept for 5 years
+    public static readonly TimeSpan Release = TimeSpan.FromDays(5 * 365);
 }
 
 public class EventBody
 {
+
     [Required, StringLength(60)]
     public string EventName { get; set; } = "";
 
@@ -61,31 +68,15 @@ public class EventBody
 
     public SystemProperties SystemProps { get; set; } = new();
 
-    public JsonObject? Props { get; set; }
+    public JsonDocument? Props { get; set; }
+
+    public TimeSpan TTL => SystemProps.IsDebug ? EventsTTL.Debug : EventsTTL.Release;
 
     public void Normalize()
     {
         // if the timestamp is in the future, normalize it to now
         if (Timestamp > DateTime.UtcNow)
             Timestamp = DateTime.UtcNow;
-    }
-
-    public void EnrichWith(string? userAgent)
-    {
-        if (string.IsNullOrEmpty(userAgent))
-            return;
-
-        // if the request doesn't have OS Name/Version, we can try to parse it from the user agent
-        if (string.IsNullOrEmpty(this.SystemProps.OSName))
-        {
-            var (osName, osVersion) = UserAgentParser.ParseOperatingSystem(userAgent);
-            this.SystemProps.OSName = osName;
-            this.SystemProps.OSVersion = osVersion;
-
-            var (engineName, engineVersion) = UserAgentParser.ParseBrowser(userAgent);
-            this.SystemProps.EngineName = engineName;
-            this.SystemProps.EngineVersion = engineVersion;
-        }
     }
 
     public (JsonObject, JsonObject) SplitProps()
@@ -96,22 +87,18 @@ public class EventBody
         if (Props != null)
         {
             // Sort by key to ensure consistent order might be useful in future!
-            foreach (var (key, node) in Props.OrderBy(x => x.Key))
+            foreach (var property in Props.RootElement.EnumerateObject().OrderBy(x => x.Name))
             {
-                if (key is null || node is null)
-                    continue;
-
-                var element = node.GetValue<JsonElement>();
-                if (element.ValueKind == JsonValueKind.Number)
-                    numericValues.Add(key, JsonValue.Create(element));
-                else if (element.ValueKind == JsonValueKind.String)
-                    stringValues.Add(key, JsonValue.Create(element));
-                else if (element.ValueKind == JsonValueKind.True)
-                    stringValues.Add(key, JsonValue.Create("true"));
-                else if (element.ValueKind == JsonValueKind.False)
-                    stringValues.Add(key, JsonValue.Create("false"));
-                else if (element.ValueKind == JsonValueKind.Null)
-                    stringValues.Add(key, JsonValue.Create(""));
+                if (property.Value.ValueKind == JsonValueKind.Number)
+                    numericValues.Add(property.Name, property.Value.GetDecimal());
+                else if (property.Value.ValueKind == JsonValueKind.String)
+                    stringValues.Add(property.Name, property.Value.GetString());
+                else if (property.Value.ValueKind == JsonValueKind.True)
+                    stringValues.Add(property.Name, "true");
+                else if (property.Value.ValueKind == JsonValueKind.False)
+                    stringValues.Add(property.Name, "false");
+                else if (property.Value.ValueKind == JsonValueKind.Null)
+                    stringValues.Add(property.Name, "");
             }
         }
 

@@ -3,7 +3,6 @@ using Aptabase.Migrations;
 using Aptabase.Application;
 using System.Net.Http.Headers;
 using Aptabase.Application.Ingestion;
-using Aptabase.Application.Demo;
 using Aptabase.Data;
 using Aptabase.Application.Authentication;
 using System.Data;
@@ -15,6 +14,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Aptabase.Application.Query;
 using Aptabase.Application.Blob;
 using Aptabase.Application.Billing;
+using Aptabase.CronJobs;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureKestrel(options =>
@@ -94,12 +94,13 @@ builder.Services.AddRateLimiter(c =>
     );
 });
 
-builder.Services.AddHostedService<ScheduledDemoDataService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<IUserHashService, DailyUserHashService>();
 builder.Services.AddSingleton<IAuthTokenManager, AuthTokenManager>();
 builder.Services.AddSingleton(appEnv);
 builder.Services.AddSingleton<IIngestionValidator, IngestionValidator>();
 builder.Services.AddSingleton<IBlobService, DatabaseBlobService>();
+builder.Services.AddHostedService<PurgeDailySaltsCronJob>();
 
 builder.Services.AddSingleton<IQueryClient, TinybirdQueryClient>();
 builder.Services.AddSingleton<IIngestionClient, TinybirdIngestionClient>();
