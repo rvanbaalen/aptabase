@@ -2,7 +2,7 @@ using FluentMigrator;
 
 namespace Aptabase.Migrations;
 
-[Migration(0004)]
+[Migration(0005)]
 public class AddBilling : Migration
 {
     public override void Up()

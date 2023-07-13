@@ -32,7 +32,7 @@ export function SubscriptionPlanSelector(props: Props) {
           </div>
         </button>
       ))}
-      <p className="text-center text-sm">
+      <p className="text-center text-sm text-subtle">
         No contract. You can switch or cancel your plan at any time.
       </p>
       <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
